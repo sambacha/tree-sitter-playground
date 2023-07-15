@@ -103,7 +103,7 @@ let tree;
   }
 
   async function handleCodeChange(editor, changes) {
-    const newText = codeEditor.getValue();
+    const newText = codeEditor.getValue() + "\n";
     const edits = tree && changes && changes.map(treeEditForEditorChange);
 
     const start = performance.now();
@@ -134,12 +134,6 @@ let tree;
     let finishedRow = false;
     let visitedChildren = false;
     let indentLevel = 0;
-
-    /*
-
-  Iterates over the abstract syntax tree, rendering it incrementally.  
-  
-*/
 
     for (let i = 0; ; i++) {
       if (i > 0 && i % 10000 === 0) {
@@ -193,7 +187,7 @@ let tree;
             start.column
           },${end.row},${end.column}">${displayName}</a> [${start.row}, ${start.column}] - [${
             end.row
-          }, ${end.column}])`;
+          }, ${end.column}]`;
           finishedRow = true;
         }
 
@@ -217,9 +211,6 @@ let tree;
     handleCursorMovement();
   }
 
-  /* 
-  @function runTreeQuery 
-  */
   function runTreeQuery(_, startRow, endRow) {
     if (endRow == null) {
       const viewport = codeEditor.getViewport();
@@ -234,8 +225,14 @@ let tree;
       if (tree && query) {
         const captures = query.captures(
           tree.rootNode,
-          { row: startRow, column: 0 },
-          { row: endRow, column: 0 }
+          {
+            row: startRow,
+            column: 0,
+          },
+          {
+            row: endRow,
+            column: 0,
+          }
         );
         let lastNodeId;
         for (const { name, node } of captures) {
@@ -243,8 +240,14 @@ let tree;
           lastNodeId = node.id;
           const { startPosition, endPosition } = node;
           codeEditor.markText(
-            { line: startPosition.row, ch: startPosition.column },
-            { line: endPosition.row, ch: endPosition.column },
+            {
+              line: startPosition.row,
+              ch: startPosition.column,
+            },
+            {
+              line: endPosition.row,
+              ch: endPosition.column,
+            },
             {
               inclusiveLeft: true,
               inclusiveRight: true,
@@ -277,8 +280,14 @@ let tree;
         queryEditor.eachLine((line) => {
           while ((match = CAPTURE_REGEX.exec(line.text))) {
             queryEditor.markText(
-              { line: row, ch: match.index },
-              { line: row, ch: match.index + match[0].length },
+              {
+                line: row,
+                ch: match.index,
+              },
+              {
+                line: row,
+                ch: match.index + match[0].length,
+              },
               {
                 inclusiveLeft: true,
                 inclusiveRight: true,
@@ -308,7 +317,9 @@ let tree;
           className: "query-error",
           inclusiveLeft: true,
           inclusiveRight: true,
-          attributes: { title: error.message },
+          attributes: {
+            title: error.message,
+          },
         });
       }
     });
@@ -321,8 +332,14 @@ let tree;
     if (isRendering) return;
 
     const selection = codeEditor.getDoc().listSelections()[0];
-    let start = { row: selection.anchor.line, column: selection.anchor.ch };
-    let end = { row: selection.head.line, column: selection.head.ch };
+    let start = {
+      row: selection.anchor.line,
+      column: selection.anchor.ch,
+    };
+    let end = {
+      row: selection.head.line,
+      column: selection.head.ch,
+    };
     if (start.row > end.row || (start.row === end.row && start.column > end.column)) {
       let swap = end;
       end = start;
@@ -345,9 +362,19 @@ let tree;
       const containerHeight = outputContainerScroll.clientHeight;
       const offset = treeRowHighlightedIndex * lineHeight;
       if (scrollTop > offset - 20) {
-        $(outputContainerScroll).animate({ scrollTop: offset - 20 }, 150);
+        $(outputContainerScroll).animate(
+          {
+            scrollTop: offset - 20,
+          },
+          150
+        );
       } else if (scrollTop < offset + lineHeight + 40 - containerHeight) {
-        $(outputContainerScroll).animate({ scrollTop: offset - containerHeight + 40 }, 150);
+        $(outputContainerScroll).animate(
+          {
+            scrollTop: offset - containerHeight + 40,
+          },
+          150
+        );
       }
     }
   }
@@ -359,7 +386,16 @@ let tree;
         .split(",")
         .map((n) => parseInt(n));
       codeEditor.focus();
-      codeEditor.setSelection({ line: startRow, ch: startColumn }, { line: endRow, ch: endColumn });
+      codeEditor.setSelection(
+        {
+          line: startRow,
+          ch: startColumn,
+        },
+        {
+          line: endRow,
+          ch: endColumn,
+        }
+      );
     }
   }
 
@@ -393,8 +429,14 @@ let tree;
     const newLineCount = change.text.length;
     const lastLineLength = change.text[newLineCount - 1].length;
 
-    const startPosition = { row: change.from.line, column: change.from.ch };
-    const oldEndPosition = { row: change.to.line, column: change.to.ch };
+    const startPosition = {
+      row: change.from.line,
+      column: change.from.ch,
+    };
+    const oldEndPosition = {
+      row: change.to.line,
+      column: change.to.ch,
+    };
     const newEndPosition = {
       row: startPosition.row + newLineCount - 1,
       column: newLineCount === 1 ? startPosition.column + lastLineLength : lastLineLength,
@@ -421,19 +463,11 @@ let tree;
     return COLORS_BY_INDEX[id % COLORS_BY_INDEX.length];
   }
 
-  function getLocalStorageItem(key) {
-    return localStorage.getItem(`${document.title}:${key}`);
-  }
-
-  function setLocalStorageItem(key, value) {
-    localStorage.setItem(`${document.title}:${key}`, value);
-  }
-
   function loadState() {
-    const language = getLocalStorageItem("language");
-    const sourceCode = getLocalStorageItem("sourceCode");
-    const query = getLocalStorageItem("query");
-    const queryEnabled = getLocalStorageItem("queryEnabled");
+    const language = localStorage.getItem("language");
+    const sourceCode = localStorage.getItem("sourceCode");
+    const query = localStorage.getItem("query");
+    const queryEnabled = localStorage.getItem("queryEnabled");
     if (language != null && sourceCode != null && query != null) {
       queryInput.value = query;
       codeInput.value = sourceCode;
@@ -443,14 +477,14 @@ let tree;
   }
 
   function saveState() {
-    setLocalStorageItem("language", languageSelect.value);
-    setLocalStorageItem("sourceCode", codeEditor.getValue());
+    localStorage.setItem("language", languageSelect.value);
+    localStorage.setItem("sourceCode", codeEditor.getValue());
     saveQueryState();
   }
 
   function saveQueryState() {
-    setLocalStorageItem("queryEnabled", queryCheckbox.checked);
-    setLocalStorageItem("query", queryEditor.getValue());
+    localStorage.setItem("queryEnabled", queryCheckbox.checked);
+    localStorage.setItem("query", queryEditor.getValue());
   }
 
   function debounce(func, wait, immediate) {
