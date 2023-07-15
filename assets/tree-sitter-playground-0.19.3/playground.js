@@ -135,6 +135,12 @@ let tree;
     let visitedChildren = false;
     let indentLevel = 0;
 
+/*
+
+  Iterates over the abstract syntax tree, rendering it incrementally.  
+  
+*/
+
     for (let i = 0;; i++) {
       if (i > 0 && i % 10000 === 0) {
         await new Promise(r => setTimeout(r, 0));
@@ -205,6 +211,9 @@ let tree;
     handleCursorMovement();
   }
 
+  /* 
+  @function runTreeQuery 
+  */
   function runTreeQuery(_, startRow, endRow) {
     if (endRow == null) {
       const viewport = codeEditor.getViewport();

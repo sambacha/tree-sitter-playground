@@ -1,0 +1,24 @@
+{
+  "name": "tree-sitter-playground",
+  "version": "0.2.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "compile": "bash setup.sh && bash run.sh",
+    "deploy": "npx gh-pages -d _site"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sambacha/tree-sitter-playground.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sambacha/tree-sitter-playground/issues"
+  },
+  "homepage": "https://github.com/sambacha/tree-sitter-playground#readme",
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
+}
